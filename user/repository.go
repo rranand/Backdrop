@@ -7,16 +7,16 @@ type Repository interface {
 }
 
 type repo struct {
-	db map[int64]*UserModel
+	db map[string]*UserModel
 }
 
 func NewRepository() Repository {
 	return &repo{
-		db: make(map[int64]*UserModel),
+		db: make(map[string]*UserModel),
 	}
 }
 
 func (r *repo) Save(ctx context.Context, userModel *UserModel) error {
-	r.db[userModel.ID] = userModel
+	r.db[string(userModel.ID)] = userModel
 	return nil
 }
