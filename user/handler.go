@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/rranand/backdrop/internal/util"
 	"github.com/rranand/backdrop/pkg/validator"
 )
 
@@ -35,8 +36,16 @@ func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := util.GenerateRandomToken(32)
+
+	for err != nil {
+		token_temp, err_temp := util.GenerateRandomToken(32)
+		token = token_temp
+		err = err_temp
+	}
+
 	userObj, _ := json.Marshal(userData)
-	fmt.Println("User : ", string(userObj))
+	fmt.Println("User : ", string(userObj), "\n", "Token : ", token)
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"status": "login success"})
