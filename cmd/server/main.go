@@ -25,8 +25,11 @@ func main() {
 	// client.Disconnect()
 
 	addr := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	log.Printf("Server started at %s", addr)
 	http.ListenAndServe(addr, router.Router())
 }
+
+//nodemon --watch './**/*.go' --signal SIGTERM --exec 'go' run cmd/server/main.go
 
 // func sample_api() {
 // 	http.HandleFunc("/", sampleFunc)

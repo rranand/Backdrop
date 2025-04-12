@@ -6,7 +6,8 @@ import (
 )
 
 type Service interface {
-	LoginUser(ctx context.Context, expense UserModel) error
+	LoginUser(ctx context.Context, userData *UserModel) error
+	CreateUser(ctx context.Context, userData *UserModel) error
 }
 
 type service struct {
@@ -17,8 +18,12 @@ func NewService(r Repository) Service {
 	return &service{repo: r}
 }
 
-func (s *service) LoginUser(ctx context.Context, userModel UserModel) error {
-	return s.repo.Save(ctx, userModel)
+func (s *service) LoginUser(ctx context.Context, userData *UserModel) error {
+	return s.repo.Save(ctx, userData)
+}
+
+func (s *service) CreateUser(ctx context.Context, userData *UserModel) error {
+	return s.repo.Save(ctx, userData)
 }
 
 // example error
