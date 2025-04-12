@@ -1,19 +1,42 @@
-# Backdrop - MVP To-Do List
+# ✅ Backdrop - Weekly TODO
 
-## Phase 1: Setup
-- [x] Initialize Go module + project structure  
-- [x] Set up PostgreSQL connection  
-- [x] Create DB tables: `users`, `login_tokens`, `tasks`  
-- [ ] Add basic HTTP server
+## Week 1: Setup & Auth
+- [ ] Define all DB models (User, Task, Token)
+- [ ] Set up Go project structure (`cmd`, `internal`, `pkg`)
+- [ ] Initialize Go modules (`go mod tidy`)
+- [ ] Create routes and basic HTTP server
+- [ ] Implement user login + token generation
+- [ ] Store login tokens in database
 
-## Phase 2: Auth & User Flow
-- [ ] Add user signup/login APIs  
-- [ ] Implement token-based auth  
-- [ ] Store login tokens in DB  
-- [ ] Add auth middleware
+---
 
-## Phase 3: File Upload & Task System
-- [ ] Generate upload URL  
-- [ ] Upload handler (file receiver)  
-- [ ] Cancel upload support  
-- [ ] Task metadata tracking
+## Week 2: Task Handling & Processing
+- [ ] API to request new task (generate upload URL)
+- [ ] File upload endpoint
+- [ ] Goroutine worker pool to simulate processing
+- [ ] Save task status to database
+- [ ] Implement cancelation logic (invalidate URL)
+- [ ] Add basic task polling endpoint
+
+---
+
+## Week 3: Contexts, Retry & Stability
+- [ ] Add context timeout + cancel support to workers
+- [ ] Add Redis or caching if needed (optional)
+- [ ] Retry failed tasks logic (optional)
+- [ ] Validate task transitions (pending → processing → done/cancelled)
+- [ ] Add middleware for logging & input validation
+
+---
+
+## Week 4: Cleanup & Wrap-up
+- [ ] Test all routes (manual/Postman)
+- [ ] Write helpful error messages & logs
+- [ ] Create Postgres schema migration script
+- [ ] Finalize README with setup instructions
+- [ ] Optional: Add Dockerfile for app + db
+- [ ] Review codebase and push to GitHub
+
+---
+
+> Tip: Check each box in VS Code as you progress! ✅
