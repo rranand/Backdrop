@@ -8,29 +8,52 @@ generator db {
 }
 
 model User {
-    id          String      @id       @default(uuid())  @db.Uuid
+    id          String      @id       @default(cuid())  @db.Uuid
     username    String      @unique
     email       String      @unique
+    password    String      
     name        String
     created_at  DateTime    @default(now())
     updated_at  DateTime    @updatedAt
     login_data  LoginData[]
+    task        Task[]
 }
 
 model LoginData {
     id              String      @id   @default(uuid())  @db.Uuid
     token           String      @unique
-    userAgent       String?
-    ipAddress       String?
+    user_agent      String?
+    ip_address      String?
     isp             String?
     state           String?
     city            String?
     country         String?
-    deviceType      String
-    expiresAt       DateTime
-    createdAt       DateTime    @default(now())
+    device_type     String
+    created_at      DateTime    @default(now())
     last_logged_in  DateTime    @updatedAt
 
     user            User        @relation(fields: [userID], references: [id])
     userID          String      @db.Uuid
+}
+
+model Task {
+    id              String      @id   @default(uuid())  @db.Uuid
+    file_name       String      @unique
+    status          TaskStatus  @default(PENDING)
+    upload_url      String
+    result_url      String
+    created_at      DateTime    @default(now())
+    updated_at      DateTime    @updatedAt
+    task_type       String
+
+    user            User        @relation(fields: [userID], references: [id])
+    userID          String      @db.Uuid
+}
+
+enum TaskStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
 }

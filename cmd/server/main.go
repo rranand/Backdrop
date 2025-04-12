@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/rranand/backdrop/prisma/db"
+	"github.com/rranand/backdrop/internal/router"
 )
 
 func main() {
@@ -13,15 +15,17 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	client := db.NewClient()
+	// client := db.NewClient()
 
-	if err := client.Prisma.Connect(); err != nil {
-		fmt.Println("Error Occurred : " + err.Error())
-	}
+	// if err := client.Prisma.Connect(); err != nil {
+	// 	log.Fatal("Error Occurred : " + err.Error())
+	// }
 
-	fmt.Println("Connection Created!")
-	client.Disconnect()
+	// log.Println("Connection Created!")
+	// client.Disconnect()
 
+	addr := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	http.ListenAndServe(addr, router.Router())
 }
 
 // func sample_api() {
