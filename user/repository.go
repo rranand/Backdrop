@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -17,7 +16,6 @@ import (
 type Repository interface {
 	LoginUserByEmail(ctx context.Context, userModel *UserModel) error
 	LoginUserByUsername(ctx context.Context, userModel *UserModel) error
-	ValidateLoginToken(ctx context.Context, authData *AuthModel) error
 	CreateUser(ctx context.Context, userData *UserModel) error
 	GenerateLoginToken(ctx context.Context, userData *UserModel, loginRequestData *LoginRequestModel) error
 	FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel, error)
@@ -153,35 +151,6 @@ func (r *repo) GenerateLoginToken(ctx context.Context, userData *UserModel, logi
 		return err
 	}
 	userData.Token = text.TrimmedString(jwtToken)
-	return nil
-}
-
-func (r *repo) ValidateLoginToken(ctx context.Context, authData *AuthModel) error {
-	query := `
-		UPDATE login_data
-		SET last_logged_in = CURRENT_TIMESTAMP
-		FROM users
-		WHERE 
-			users.username = $1
-			AND login_data.token = $2
-			AND login_data.user_id = users.id
-		RETURNING login_data.id
-		;
-	`
-
-	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
-	defer cancel()
-
-	var updatedID string
-	err := r.db.QueryRowContext(ctx, query, authData.Username, authData.Token).Scan(&updatedID)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("invalid login session")
-		}
-		return err
-	}
-
 	return nil
 }
 

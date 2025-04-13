@@ -45,7 +45,6 @@ type AuthResponseModel struct {
 type ProfileModel struct {
 	Username     string    `json:"username"`
 	Name         string    `json:"name"`
-	Password     string    `json:"password"`
 	Email        string    `json:"email"`
 	CreatedOn    time.Time `json:"created_at"`
 	UpdatedOn    time.Time `json:"updated_at"`

@@ -21,6 +21,7 @@ func Router() *chi.Mux {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(custommiddleware.JsonMiddleware)
+	r.Use(custommiddleware.ValidateAuthToken)
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},

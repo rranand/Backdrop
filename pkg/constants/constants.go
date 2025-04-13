@@ -10,3 +10,7 @@ var (
 	ErrConflict          = errors.New("resource already exists")
 	QueryTimeoutDuration = time.Second * 5
 )
+
+type contextKey string
+
+const AuthDataKey = contextKey("authData")

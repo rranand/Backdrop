@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/rranand/backdrop/internal/util"
+	"github.com/rranand/backdrop/pkg/constants"
 	"github.com/rranand/backdrop/pkg/validator"
 )
 
@@ -67,46 +68,15 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userData)
 }
 
-func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
-	res := util.JSONResponseWriter{ResponseWriter: w}
-	var authData AuthModel
-
-	if err := json.NewDecoder(r.Body).Decode(&authData); err != nil {
-		res.SendJSONError("Invalid Data Provided", http.StatusBadRequest)
-		return
-	}
-
-	if len(authData.Username) <= 5 || !validator.IsJWTValid(string(authData.Token)) {
-		res.SendJSONError("Login Session Expired", http.StatusBadRequest)
-		return
-	}
-
-	if err := h.service.AuthUser(r.Context(), &authData); err != nil {
-		res.SendJSONError(err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	authRes := AuthResponseModel{
-		Status: "Login Success",
-	}
-
-	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(authRes)
-}
-
 func (h *Handler) FetchUser(w http.ResponseWriter, r *http.Request) {
 	res := util.JSONResponseWriter{ResponseWriter: w}
-	var authData AuthModel
 
-	if err := json.NewDecoder(r.Body).Decode(&authData); err != nil {
-		res.SendJSONError("Invalid Data Provided", http.StatusBadRequest)
+	authData, ok := r.Context().Value(constants.AuthDataKey).(AuthModel)
+	if !ok {
+		res.SendJSONError("Internal Server Error", http.StatusBadRequest)
 		return
 	}
 
-	if len(authData.Username) <= 5 || !validator.IsJWTValid(string(authData.Token)) {
-		res.SendJSONError("Login Session Expired", http.StatusBadRequest)
-		return
-	}
 	profileData, err := h.service.FetchUser(r.Context(), &authData)
 
 	if err != nil {

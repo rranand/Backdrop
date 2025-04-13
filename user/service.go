@@ -2,15 +2,11 @@ package user
 
 import (
 	"context"
-	"errors"
-
-	"github.com/rranand/backdrop/internal/util"
 )
 
 type Service interface {
 	LoginUser(ctx context.Context, userData *UserModel, loginRequestModel *LoginRequestModel) error
 	CreateUser(ctx context.Context, userData *UserModel) error
-	AuthUser(ctx context.Context, authData *AuthModel) error
 	FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel, error)
 }
 
@@ -46,25 +42,6 @@ func (s *service) LoginUser(ctx context.Context, userData *UserModel, loginReque
 
 func (s *service) CreateUser(ctx context.Context, userData *UserModel) error {
 	err := s.repo.CreateUser(ctx, userData)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *service) AuthUser(ctx context.Context, authData *AuthModel) error {
-	claims, err := util.ParseJWT(string(authData.Token))
-
-	if err != nil {
-		return err
-	}
-
-	if claims["user_id"] != string(authData.Username) {
-		return errors.New("invalid login session")
-	}
-
-	err = s.repo.ValidateLoginToken(ctx, authData)
 
 	if err != nil {
 		return err
