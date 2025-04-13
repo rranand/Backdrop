@@ -22,7 +22,7 @@ func (w JSONResponseWriter) SendJSONError(err string, httpCode int) {
 	http.Error(w, stringRep, httpCode)
 }
 
-func getJWTSecret() ([]byte, error) {
+func GetJWTSecret() ([]byte, error) {
 	secretStr := os.Getenv("JWT_SECRET")
 	if secretStr == "" {
 		return nil, errors.New("JWT_SECRET environment variable not set")
@@ -41,7 +41,7 @@ func getJWTSecret() ([]byte, error) {
 }
 
 func GenerateJWTToken(claims jwt.Claims) (string, error) {
-	key, err := getJWTSecret()
+	key, err := GetJWTSecret()
 
 	if err != nil {
 		return "", errors.New("failed to parse JWT key")
@@ -49,6 +49,30 @@ func GenerateJWTToken(claims jwt.Claims) (string, error) {
 
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return t.SignedString(key)
+}
+
+func ParseJWT(tokenStr string) (jwt.MapClaims, error) {
+	key, err := GetJWTSecret()
+
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if ok {
+		return claims, nil
+	} else {
+		return nil, errors.New("failed to parse JWT Token")
+	}
 }
 
 func GenerateUUID() string {

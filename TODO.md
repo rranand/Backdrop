@@ -1,12 +1,12 @@
 # ✅ Backdrop - Weekly TODO
 
 ## Week 1: Setup & Auth
-- [ ] Define all DB models (User, Task, Token)
-- [ ] Set up Go project structure (`cmd`, `internal`, `pkg`)
-- [ ] Initialize Go modules (`go mod tidy`)
-- [ ] Create routes and basic HTTP server
-- [ ] Implement user login + token generation
-- [ ] Store login tokens in database
+- [x] Define all DB models (User, Task, Token)
+- [x] Set up Go project structure (`cmd`, `internal`, `pkg`)
+- [x] Initialize Go modules (`go mod tidy`)
+- [x] Create routes and basic HTTP server
+- [x] Implement user login + token generation
+- [x] Store login tokens in database
 
 ---
 

@@ -31,6 +31,15 @@ type LoginResponseModel struct {
 	Token string `json:"token"`
 }
 
+type AuthModel struct {
+	Username text.TrimmedString `json:"username"`
+	Token    text.TrimmedString `json:"token"`
+}
+
+type AuthResponseModel struct {
+	Status text.TrimmedString `json:"status"`
+}
+
 func GetUserFromLoginRequest(loginRequestModel LoginRequestModel) UserModel {
 	userData := UserModel{Password: loginRequestModel.Password}
 

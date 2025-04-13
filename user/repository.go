@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 type Repository interface {
 	LoginUserByEmail(ctx context.Context, userModel *UserModel) error
 	LoginUserByUsername(ctx context.Context, userModel *UserModel) error
-	ValidateLoginToken(ctx context.Context, loginToken string) (*UserModel, error)
+	ValidateLoginToken(ctx context.Context, authData *AuthModel) error
 	CreateUser(ctx context.Context, userData *UserModel) error
 	GenerateLoginToken(ctx context.Context, userData *UserModel, loginRequestData *LoginRequestModel) error
 }
@@ -127,7 +128,7 @@ func (r *repo) GenerateLoginToken(ctx context.Context, userData *UserModel, logi
 
 	jwtToken, err := util.GenerateJWTToken(jwt.MapClaims{
 		"ip_address": loginRequestData.IPAddress,
-		"user_id":    userData.ID,
+		"user_id":    userData.Username,
 		"hash":       util.GenerateUUID(),
 		"TimeStamp":  currentTime,
 	})
@@ -148,44 +149,33 @@ func (r *repo) GenerateLoginToken(ctx context.Context, userData *UserModel, logi
 	return nil
 }
 
-func (r *repo) ValidateLoginToken(ctx context.Context, loginToken string) (*UserModel, error) {
-
-	currentTime := time.Now()
-
+func (r *repo) ValidateLoginToken(ctx context.Context, authData *AuthModel) error {
 	query := `
-		UPDATE login_data 
-		SET last_logged_in = $1 
+		UPDATE login_data
+		SET last_logged_in = CURRENT_TIMESTAMP
 		FROM users
-		WHERE login_data.user_id = users.id 
-		AND login_data.token = $2 
-		RETURNING users.id, users.email, users.username, users.name;
+		WHERE 
+			users.username = $1
+			AND login_data.token = $2
+			AND login_data.user_id = users.id
+		RETURNING login_data.id
+		;
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
 	defer cancel()
 
-	rows, err := r.db.QueryContext(ctx, query, currentTime, loginToken)
+	var updatedID string
+	err := r.db.QueryRowContext(ctx, query, authData.Username, authData.Token).Scan(&updatedID)
+
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var userData UserModel
-	cnt := 0
-
-	for rows.Next() {
-		cnt++
-		err := rows.Scan(&userData.ID, &userData.Email, &userData.Username, &userData.Name)
-		if err != nil {
-			return nil, err
+		if err == sql.ErrNoRows {
+			return errors.New("invalid login session")
 		}
+		return err
 	}
 
-	if cnt == 1 {
-		return &userData, nil
-	} else {
-		return nil, ErrConflict
-	}
+	return nil
 }
 
 func (r *repo) CreateUser(ctx context.Context, userData *UserModel) error {

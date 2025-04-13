@@ -3,6 +3,9 @@ package validator
 import (
 	"regexp"
 	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/rranand/backdrop/internal/util"
 )
 
 func IsEmailValid(txt string) bool {
@@ -17,4 +20,23 @@ func TrimString(txt string) string {
 
 func IsTextEmpty(txt string) bool {
 	return len(TrimString(txt)) == 0
+}
+
+func IsJWTValid(tokenStr string) bool {
+	key, err := util.GetJWTSecret()
+
+	if err != nil {
+		return false
+	}
+
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return key, nil
+	})
+
+	switch {
+	case token.Valid:
+		return true
+	default:
+		return false
+	}
 }
