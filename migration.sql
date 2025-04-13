@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- CreateEnum
 CREATE TYPE "TaskStatus" AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED');
 -- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE users (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "username" TEXT NOT NULL UNIQUE,
     "email" TEXT NOT NULL UNIQUE,
@@ -12,11 +12,11 @@ CREATE TABLE "User" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "LoginData" (
+CREATE TABLE login_data (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "token" TEXT NOT NULL UNIQUE,
     "user_agent" TEXT,
@@ -30,11 +30,11 @@ CREATE TABLE "LoginData" (
     "last_logged_in" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userID" UUID NOT NULL,
 
-    CONSTRAINT "LoginData_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "login_data_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Task" (
+CREATE TABLE tasks (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "file_name" TEXT NOT NULL,
     "status" "TaskStatus" NOT NULL DEFAULT 'PENDING',
@@ -45,23 +45,23 @@ CREATE TABLE "Task" (
     "task_type" TEXT NOT NULL,
     "userID" UUID NOT NULL,
 
-    CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "tasks_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+CREATE UNIQUE INDEX "users_username_key" ON users("username");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "users_email_key" ON users("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "LoginData_token_key" ON "LoginData"("token");
+CREATE UNIQUE INDEX "login_data_token_key" ON login_data("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Task_file_name_key" ON "Task"("file_name");
+CREATE UNIQUE INDEX "tasks_file_name_key" ON task("file_name");
 
 -- AddForeignKey
-ALTER TABLE "LoginData" ADD CONSTRAINT "LoginData_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE login_data ADD CONSTRAINT "login_data_userID_fkey" FOREIGN KEY ("userID") REFERENCES users("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE tasks ADD CONSTRAINT "tasks_userID_fkey" FOREIGN KEY ("userID") REFERENCES users("id") ON DELETE RESTRICT ON UPDATE CASCADE;

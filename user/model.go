@@ -19,7 +19,7 @@ type LoginRequestModel struct {
 	Password   text.TrimmedString `json:"password"`
 }
 
-func GetUserFromLoginRequest(loginRequestModel LoginRequestModel) *UserModel {
+func GetUserFromLoginRequest(loginRequestModel LoginRequestModel) UserModel {
 	userData := UserModel{Password: loginRequestModel.Password}
 
 	if validator.IsEmailValid(string(loginRequestModel.Identifier)) {
@@ -28,5 +28,5 @@ func GetUserFromLoginRequest(loginRequestModel LoginRequestModel) *UserModel {
 		userData.Username = loginRequestModel.Identifier
 	}
 
-	return &userData
+	return userData
 }

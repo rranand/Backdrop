@@ -2,8 +2,6 @@ package user
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 )
 
 type Service interface {
@@ -30,10 +28,8 @@ func (s *service) LoginUser(ctx context.Context, userData *UserModel) error {
 
 	if err != nil {
 		return err
-	} else {
-		userObj, _ := json.Marshal(userData)
-		fmt.Println("User : ", string(userObj))
 	}
+
 	return nil
 }
 

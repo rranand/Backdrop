@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/rranand/backdrop/internal/util"
@@ -26,30 +25,27 @@ func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(loginRequestModel.Identifier) <= 5 || len(loginRequestModel.Password) <= 8 {
+	if len(loginRequestModel.Identifier) <= 5 || len(loginRequestModel.Password) <= 7 {
 		res.SendJSONError("Invalid Data Provided", http.StatusBadRequest)
 		return
 	}
 
 	userData := GetUserFromLoginRequest(loginRequestModel)
-	if err := h.service.LoginUser(r.Context(), userData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := h.service.LoginUser(r.Context(), &userData); err != nil {
+		res.SendJSONError(err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	token, err := util.GenerateRandomToken(32)
+	// token, err := util.GenerateRandomToken(32)
 
-	for err != nil {
-		token_temp, err_temp := util.GenerateRandomToken(32)
-		token = token_temp
-		err = err_temp
-	}
+	// for err != nil {
+	// 	token_temp, err_temp := util.GenerateRandomToken(32)
+	// 	token = token_temp
+	// 	err = err_temp
+	// }
 
-	userObj, _ := json.Marshal(userData)
-	fmt.Println("User : ", string(userObj), "\n", "Token : ", token)
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"status": "login success"})
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(userData)
 }
 
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -72,5 +68,5 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"status": "signup success"})
+	json.NewEncoder(w).Encode(userData)
 }
