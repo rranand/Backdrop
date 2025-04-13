@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 )
 
@@ -19,12 +20,28 @@ func NewService(r Repository) Service {
 }
 
 func (s *service) LoginUser(ctx context.Context, userData *UserModel) error {
-	return s.repo.Save(ctx, userData)
+	err := error(nil)
+
+	if len(userData.Email) == 0 {
+		err = s.repo.LoginUserByUsername(ctx, userData)
+	} else {
+		err = s.repo.LoginUserByEmail(ctx, userData)
+	}
+
+	if err != nil {
+		return err
+	} else {
+		userObj, _ := json.Marshal(userData)
+		fmt.Println("User : ", string(userObj))
+	}
+	return nil
 }
 
 func (s *service) CreateUser(ctx context.Context, userData *UserModel) error {
-	return s.repo.Save(ctx, userData)
-}
+	err := s.repo.CreateUser(ctx, userData)
 
-// example error
-var ErrInvalidAmount = fmt.Errorf("amount must be greater than 0")
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -58,18 +58,17 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validator.IsEmailValid(string(userData.Email)) || len(userData.Password) <= 8 || len(userData.Username) <= 5 || len(userData.Name) <= 2 {
+	if !validator.IsEmailValid(string(userData.Email)) || len(userData.Password) <= 7 || len(userData.Username) <= 5 || len(userData.Name) <= 2 {
 		http.Error(w, "Invalid Request", http.StatusBadRequest)
 		return
 	}
 
-	userObj, _ := json.Marshal(userData)
-	fmt.Println("User : ", string(userObj))
-
 	if err := h.service.CreateUser(r.Context(), &userData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		res := util.JSONResponseWriter{ResponseWriter: w}
+		res.SendJSONError(err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"status": "signup success"})
 }

@@ -11,6 +11,7 @@ type UserModel struct {
 	Name     text.TrimmedString `json:"name"`
 	Password text.TrimmedString `json:"password"`
 	Email    text.TrimmedString `json:"email"`
+	Token    text.TrimmedString `json:"token"`
 }
 
 type LoginRequestModel struct {

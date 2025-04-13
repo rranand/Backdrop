@@ -22,7 +22,7 @@ func main() {
 		return
 	}
 
-	err = database.Connect()
+	err = database.Connect(os.Getenv("DB_URL"))
 
 	if err != nil {
 		log.Fatal("Server StartUp Failed, Error while Connection To DB")

@@ -8,10 +8,10 @@ import (
 type TrimmedString string
 
 func (s *TrimmedString) UnmarshalJSON(b []byte) error {
-    var raw string
-    if err := json.Unmarshal(b, &raw); err != nil {
-        return err
-    }
-    *s = TrimmedString(strings.TrimSpace(raw))
-    return nil
+	var raw string
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	*s = TrimmedString(strings.TrimSpace(raw))
+	return nil
 }

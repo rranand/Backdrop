@@ -2,17 +2,48 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"log"
+	"time"
 
-	"github.com/rranand/backdrop/prisma/db"
+	_ "github.com/lib/pq"
 )
 
-var Client *db.PrismaClient
+var DB *sql.DB
 
-func Connect() error {
-	Client = db.NewClient()
+func New(addr string) error {
+	DB, err := sql.Open("postgres", addr)
+	if err != nil {
+		return err
+	}
 
-	if err := Client.Prisma.Connect(); err != nil {
+	maxOpenConns := 10
+	maxIdleConns := 10
+	maxIdleTime := "15m"
+
+	DB.SetMaxOpenConns(maxOpenConns)
+	DB.SetMaxIdleConns(maxIdleConns)
+
+	duration, err := time.ParseDuration(maxIdleTime)
+	if err != nil {
+		return err
+	}
+	DB.SetConnMaxIdleTime(duration)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err = DB.PingContext(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Connect(addr string) error {
+	err := error(nil)
+	DB, err = sql.Open("postgres", addr)
+	if err != nil {
 		log.Fatal("Error Occurred : " + err.Error())
 		return err
 	}
@@ -22,14 +53,14 @@ func Connect() error {
 }
 
 func Disconnect(ctx context.Context) {
-	if Client == nil {
+	if DB == nil {
 		log.Println("⚠️ DB client is nil, nothing to disconnect")
 		return
 	}
 	done := make(chan error, 1)
 	go func() {
 		log.Println("🔌 Attempting to disconnect DB...")
-		done <- Client.Prisma.Disconnect()
+		done <- DB.Close()
 	}()
 
 	select {
