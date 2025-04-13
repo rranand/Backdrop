@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	"github.com/rranand/backdrop/pkg/text"
 	"github.com/rranand/backdrop/pkg/validator"
 )
@@ -38,6 +40,16 @@ type AuthModel struct {
 
 type AuthResponseModel struct {
 	Status text.TrimmedString `json:"status"`
+}
+
+type ProfileModel struct {
+	Username     string    `json:"username"`
+	Name         string    `json:"name"`
+	Password     string    `json:"password"`
+	Email        string    `json:"email"`
+	CreatedOn    time.Time `json:"created_at"`
+	UpdatedOn    time.Time `json:"updated_at"`
+	LastLoggedIn time.Time `json:"last_logged_in"`
 }
 
 func GetUserFromLoginRequest(loginRequestModel LoginRequestModel) UserModel {

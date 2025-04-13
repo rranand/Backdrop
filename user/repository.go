@@ -20,6 +20,7 @@ type Repository interface {
 	ValidateLoginToken(ctx context.Context, authData *AuthModel) error
 	CreateUser(ctx context.Context, userData *UserModel) error
 	GenerateLoginToken(ctx context.Context, userData *UserModel, loginRequestData *LoginRequestModel) error
+	FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel, error)
 }
 
 type repo struct {
@@ -38,8 +39,11 @@ var ErrInvalidCredential = fmt.Errorf("credential not valid")
 
 func (r *repo) LoginUserByUsername(ctx context.Context, userData *UserModel) error {
 	query := `
-		SELECT u.id, u.email, u.name FROM users as u
-		WHERE u.username = $1 AND u.password = $2; `
+		SELECT id, email, name 
+		FROM users
+		WHERE 
+		username = $1 AND password = $2; 
+	`
 
 	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
 	defer cancel()
@@ -73,8 +77,11 @@ func (r *repo) LoginUserByUsername(ctx context.Context, userData *UserModel) err
 
 func (r *repo) LoginUserByEmail(ctx context.Context, userData *UserModel) error {
 	query := `
-		SELECT u.id, u.username, u.name FROM users as u
-		WHERE u.email = $1 AND u.password = $2; `
+		SELECT id, username, name 
+		FROM users
+		WHERE 
+		email = $1 AND password = $2; 
+	`
 
 	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
 	defer cancel()
@@ -195,4 +202,69 @@ func (r *repo) CreateUser(ctx context.Context, userData *UserModel) error {
 		return err
 	}
 	return nil
+}
+
+func (r *repo) FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel, error) {
+	var profileData ProfileModel
+
+	query := `
+		SELECT id, email, username, name, created_at, updated_at FROM users as u
+		WHERE username = $1
+		; 
+	`
+
+	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
+	defer cancel()
+
+	rows, err := r.db.QueryContext(ctx, query, authData.Username)
+	if err != nil {
+		return profileData, err
+	}
+	defer rows.Close()
+
+	cnt := 0
+	var uid string
+
+	for rows.Next() {
+		cnt++
+		err := rows.Scan(&uid, &profileData.Email, &profileData.Username, &profileData.Name, &profileData.CreatedOn, &profileData.UpdatedOn)
+		if err != nil {
+			return profileData, err
+		}
+	}
+
+	if cnt == 0 {
+		return profileData, ErrNoRecordFound
+	} else if cnt > 1 {
+		return ProfileModel{}, nil
+	}
+
+	query = `
+		SELECT MAX(last_logged_in) FROM login_data as ld
+		WHERE user_id = $1
+		GROUP BY user_id
+		; 
+	`
+
+	ctx, cancel = context.WithTimeout(ctx, constants.QueryTimeoutDuration)
+	defer cancel()
+
+	rows, err = r.db.QueryContext(ctx, query, uid)
+	if err != nil {
+		return profileData, err
+	}
+	defer rows.Close()
+
+	var last_logged_in time.Time
+
+	for rows.Next() {
+		cnt++
+		err := rows.Scan(&last_logged_in)
+		if err != nil {
+			return profileData, err
+		}
+	}
+	profileData.LastLoggedIn = last_logged_in
+
+	return profileData, nil
 }

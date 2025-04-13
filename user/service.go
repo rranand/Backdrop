@@ -11,6 +11,7 @@ type Service interface {
 	LoginUser(ctx context.Context, userData *UserModel, loginRequestModel *LoginRequestModel) error
 	CreateUser(ctx context.Context, userData *UserModel) error
 	AuthUser(ctx context.Context, authData *AuthModel) error
+	FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel, error)
 }
 
 type service struct {
@@ -69,4 +70,9 @@ func (s *service) AuthUser(ctx context.Context, authData *AuthModel) error {
 		return err
 	}
 	return nil
+}
+
+func (s *service) FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel, error) {
+	profileData, err := s.repo.FetchUser(ctx, authData)
+	return profileData, err
 }

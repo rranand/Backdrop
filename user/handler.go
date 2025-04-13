@@ -93,3 +93,27 @@ func (h *Handler) AuthUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(authRes)
 }
+
+func (h *Handler) FetchUser(w http.ResponseWriter, r *http.Request) {
+	res := util.JSONResponseWriter{ResponseWriter: w}
+	var authData AuthModel
+
+	if err := json.NewDecoder(r.Body).Decode(&authData); err != nil {
+		res.SendJSONError("Invalid Data Provided", http.StatusBadRequest)
+		return
+	}
+
+	if len(authData.Username) <= 5 || !validator.IsJWTValid(string(authData.Token)) {
+		res.SendJSONError("Login Session Expired", http.StatusBadRequest)
+		return
+	}
+	profileData, err := h.service.FetchUser(r.Context(), &authData)
+
+	if err != nil {
+		res.SendJSONError(err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(profileData)
+}

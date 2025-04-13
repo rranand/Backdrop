@@ -38,5 +38,3 @@
 - [ ] Review codebase and push to GitHub
 
 ---
-
-> Tip: Check each box in VS Code as you progress! ✅
