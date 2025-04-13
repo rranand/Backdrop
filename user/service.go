@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	LoginUser(ctx context.Context, userData *UserModel) error
+	LoginUser(ctx context.Context, userData *UserModel, loginRequestModel *LoginRequestModel) error
 	CreateUser(ctx context.Context, userData *UserModel) error
 }
 
@@ -17,7 +17,7 @@ func NewService(r Repository) Service {
 	return &service{repo: r}
 }
 
-func (s *service) LoginUser(ctx context.Context, userData *UserModel) error {
+func (s *service) LoginUser(ctx context.Context, userData *UserModel, loginRequestModel *LoginRequestModel) error {
 	err := error(nil)
 
 	if len(userData.Email) == 0 {
@@ -25,6 +25,12 @@ func (s *service) LoginUser(ctx context.Context, userData *UserModel) error {
 	} else {
 		err = s.repo.LoginUserByEmail(ctx, userData)
 	}
+
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.GenerateLoginToken(ctx, userData, loginRequestModel)
 
 	if err != nil {
 		return err

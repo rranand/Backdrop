@@ -15,8 +15,20 @@ type UserModel struct {
 }
 
 type LoginRequestModel struct {
+	ID         text.TrimmedString `json:"id,omitempty"`
 	Identifier text.TrimmedString `json:"identifier"`
 	Password   text.TrimmedString `json:"password"`
+	UserAgent  text.TrimmedString `json:"user_agent"`
+	IPAddress  text.TrimmedString `json:"ip_address"`
+	ISP        text.TrimmedString `json:"isp"`
+	State      text.TrimmedString `json:"state"`
+	City       text.TrimmedString `json:"city"`
+	Country    text.TrimmedString `json:"country"`
+	DeviceType text.TrimmedString `json:"device_type"`
+}
+
+type LoginResponseModel struct {
+	Token string `json:"token"`
 }
 
 func GetUserFromLoginRequest(loginRequestModel LoginRequestModel) UserModel {

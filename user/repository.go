@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt"
+	"github.com/rranand/backdrop/internal/util"
 	"github.com/rranand/backdrop/pkg/constants"
 	"github.com/rranand/backdrop/pkg/database"
+	"github.com/rranand/backdrop/pkg/text"
 )
 
 type Repository interface {
@@ -15,6 +18,7 @@ type Repository interface {
 	LoginUserByUsername(ctx context.Context, userModel *UserModel) error
 	ValidateLoginToken(ctx context.Context, loginToken string) (*UserModel, error)
 	CreateUser(ctx context.Context, userData *UserModel) error
+	GenerateLoginToken(ctx context.Context, userData *UserModel, loginRequestData *LoginRequestModel) error
 }
 
 type repo struct {
@@ -101,6 +105,49 @@ func (r *repo) LoginUserByEmail(ctx context.Context, userData *UserModel) error 
 	return nil
 }
 
+func (r *repo) GenerateLoginToken(ctx context.Context, userData *UserModel, loginRequestData *LoginRequestModel) error {
+	query := `
+		INSERT INTO login_data (
+			token,
+			user_agent,
+			ip_address,
+			isp,
+			state,
+			city,
+			country,
+			device_type,
+			user_id
+		) VALUES (
+			$1, $2, $3, $4, $5, $6, $7, $8, $9
+		)
+		RETURNING id;
+	`
+
+	currentTime := time.Now()
+
+	jwtToken, err := util.GenerateJWTToken(jwt.MapClaims{
+		"ip_address": loginRequestData.IPAddress,
+		"user_id":    userData.ID,
+		"hash":       util.GenerateUUID(),
+		"TimeStamp":  currentTime,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
+	defer cancel()
+
+	err = r.db.QueryRowContext(ctx, query, jwtToken, loginRequestData.UserAgent, loginRequestData.IPAddress, loginRequestData.ISP, loginRequestData.State, loginRequestData.City, loginRequestData.Country, loginRequestData.DeviceType, userData.ID).Scan(&loginRequestData.ID)
+
+	if err != nil {
+		return err
+	}
+	userData.Token = text.TrimmedString(jwtToken)
+	return nil
+}
+
 func (r *repo) ValidateLoginToken(ctx context.Context, loginToken string) (*UserModel, error) {
 
 	currentTime := time.Now()
@@ -109,7 +156,7 @@ func (r *repo) ValidateLoginToken(ctx context.Context, loginToken string) (*User
 		UPDATE login_data 
 		SET last_logged_in = $1 
 		FROM users
-		WHERE login_data.userID = users.id 
+		WHERE login_data.user_id = users.id 
 		AND login_data.token = $2 
 		RETURNING users.id, users.email, users.username, users.name;
 	`

@@ -18,34 +18,30 @@ func NewHandler(s Service) *Handler {
 
 func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	res := util.JSONResponseWriter{ResponseWriter: w}
-	var loginRequestModel LoginRequestModel
+	var loginRequestData LoginRequestModel
 
-	if err := json.NewDecoder(r.Body).Decode(&loginRequestModel); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&loginRequestData); err != nil {
 		res.SendJSONError("Invalid Data Provided", http.StatusBadRequest)
 		return
 	}
 
-	if len(loginRequestModel.Identifier) <= 5 || len(loginRequestModel.Password) <= 7 {
+	if len(loginRequestData.Identifier) <= 5 || len(loginRequestData.Password) <= 7 {
 		res.SendJSONError("Invalid Data Provided", http.StatusBadRequest)
 		return
 	}
 
-	userData := GetUserFromLoginRequest(loginRequestModel)
-	if err := h.service.LoginUser(r.Context(), &userData); err != nil {
+	userData := GetUserFromLoginRequest(loginRequestData)
+	if err := h.service.LoginUser(r.Context(), &userData, &loginRequestData); err != nil {
 		res.SendJSONError(err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// token, err := util.GenerateRandomToken(32)
-
-	// for err != nil {
-	// 	token_temp, err_temp := util.GenerateRandomToken(32)
-	// 	token = token_temp
-	// 	err = err_temp
-	// }
+	userLoginToken := LoginResponseModel{
+		Token: string(userData.Token),
+	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(userData)
+	json.NewEncoder(w).Encode(userLoginToken)
 }
 
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {

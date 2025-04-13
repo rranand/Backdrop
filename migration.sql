@@ -28,7 +28,7 @@ CREATE TABLE login_data (
     "device_type" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "last_logged_in" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userID" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
 
     CONSTRAINT "login_data_pkey" PRIMARY KEY ("id")
 );
@@ -43,25 +43,13 @@ CREATE TABLE tasks (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "task_type" TEXT NOT NULL,
-    "userID" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
 
     CONSTRAINT "tasks_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "users_username_key" ON users("username");
-
--- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON users("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "login_data_token_key" ON login_data("token");
-
--- CreateIndex
-CREATE UNIQUE INDEX "tasks_file_name_key" ON task("file_name");
+-- AddForeignKey
+ALTER TABLE login_data ADD CONSTRAINT "login_data_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES users("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE login_data ADD CONSTRAINT "login_data_userID_fkey" FOREIGN KEY ("userID") REFERENCES users("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE tasks ADD CONSTRAINT "tasks_userID_fkey" FOREIGN KEY ("userID") REFERENCES users("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE tasks ADD CONSTRAINT "tasks_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES users("id") ON DELETE RESTRICT ON UPDATE CASCADE;
