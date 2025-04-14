@@ -177,26 +177,25 @@ func (r *repo) FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel
 	var profileData ProfileModel
 
 	query := `
-		SELECT id, email, username, name, created_at, updated_at FROM users as u
-		WHERE username = $1
+		SELECT email, username, name, created_at, updated_at FROM users as u
+		WHERE id = $1
 		; 
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
 	defer cancel()
 
-	rows, err := r.db.QueryContext(ctx, query, authData.Username)
+	rows, err := r.db.QueryContext(ctx, query, authData.UserID)
 	if err != nil {
 		return profileData, err
 	}
 	defer rows.Close()
 
 	cnt := 0
-	var uid string
 
 	for rows.Next() {
 		cnt++
-		err := rows.Scan(&uid, &profileData.Email, &profileData.Username, &profileData.Name, &profileData.CreatedOn, &profileData.UpdatedOn)
+		err := rows.Scan(&profileData.Email, &profileData.Username, &profileData.Name, &profileData.CreatedOn, &profileData.UpdatedOn)
 		if err != nil {
 			return profileData, err
 		}
@@ -218,7 +217,7 @@ func (r *repo) FetchUser(ctx context.Context, authData *AuthModel) (ProfileModel
 	ctx, cancel = context.WithTimeout(ctx, constants.QueryTimeoutDuration)
 	defer cancel()
 
-	rows, err = r.db.QueryContext(ctx, query, uid)
+	rows, err = r.db.QueryContext(ctx, query, authData.UserID)
 	if err != nil {
 		return profileData, err
 	}

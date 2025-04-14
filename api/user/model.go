@@ -34,8 +34,7 @@ type LoginResponseModel struct {
 }
 
 type AuthModel struct {
-	Username text.TrimmedString `json:"username"`
-	Token    text.TrimmedString `json:"token"`
+	UserID string `json:"uid"`
 }
 
 type AuthResponseModel struct {

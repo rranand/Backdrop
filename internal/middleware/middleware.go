@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"slices"
 
@@ -31,11 +30,9 @@ func ValidateAuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !slices.Contains(PublicURL, r.URL.Path) {
 			res := util.JSONResponseWriter{ResponseWriter: w}
-			var authData user.AuthModel
+			authHeader := r.Header.Get("Authorization")
 
-			json.NewDecoder(r.Body).Decode(&authData)
-
-			if len(authData.Username) <= 5 || !validator.IsJWTValid(string(authData.Token)) {
+			if !validator.IsJWTValid(authHeader) {
 				res.SendJSONError("unauthorized access", http.StatusUnauthorized)
 				return
 			}
@@ -45,24 +42,25 @@ func ValidateAuthToken(next http.Handler) http.Handler {
 				SET last_logged_in = CURRENT_TIMESTAMP
 				FROM users
 				WHERE 
-					users.username = $1
-					AND login_data.token = $2
-					AND login_data.user_id = users.id
-				RETURNING login_data.id
+					login_data.token = $1 AND 
+					login_data.user_id = users.id
+				RETURNING users.id
 				;
 			`
 
 			ctx, cancel := context.WithTimeout(context.Background(), constants.QueryTimeoutDuration)
 			defer cancel()
 
-			var updatedID string
+			var uid string
 
-			err := database.DB.QueryRowContext(ctx, query, authData.Username, authData.Token).Scan(&updatedID)
+			err := database.DB.QueryRowContext(ctx, query, authHeader).Scan(&uid)
 
 			if err != nil {
 				res.SendJSONError("unauthorized access", http.StatusUnauthorized)
 				return
 			}
+
+			authData := user.AuthModel{UserID: uid}
 			ctx = context.WithValue(r.Context(), constants.AuthDataKey, authData)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		} else {
