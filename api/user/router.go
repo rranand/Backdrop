@@ -4,7 +4,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func AuthRouter() *chi.Mux {
+func Router() *chi.Mux {
 
 	r := chi.NewRouter()
 

@@ -4,17 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
-	"github.com/golang-jwt/jwt"
-	"github.com/rranand/backdrop/internal/util"
 	"github.com/rranand/backdrop/pkg/constants"
 	"github.com/rranand/backdrop/pkg/database"
-	"github.com/rranand/backdrop/pkg/text"
 )
 
 type Repository interface {
-	CreateTask(ctx context.Context) (NewTaskModel, error)
+	CreateTask(ctx context.Context, newTask *NewTaskModel) error
 }
 
 type repo struct {
@@ -31,45 +27,24 @@ var ErrConflict = fmt.Errorf("conflict records found")
 var ErrNoRecordFound = fmt.Errorf("no record found")
 var ErrInvalidCredential = fmt.Errorf("credential not valid")
 
-func (r *repo) CreateTask(ctx context.Context) (NewTaskModel, error) {
+func (r *repo) CreateTask(ctx context.Context, newTask *NewTaskModel) error {
 	query := `
-		INSERT INTO login_data (
-			token,
-			user_agent,
-			ip_address,
-			isp,
-			state,
-			city,
-			country,
-			device_type,
+		INSERT INTO tasks (
+			task_type,
 			user_id
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9
+			$1, $2
 		)
-		RETURNING id;
+		RETURNING id, status;
 	`
-
-	currentTime := time.Now()
-
-	jwtToken, err := util.GenerateJWTToken(jwt.MapClaims{
-		"ip_address": loginRequestData.IPAddress,
-		"user_id":    userData.Username,
-		"hash":       util.GenerateUUID(),
-		"TimeStamp":  currentTime,
-	})
-
-	if err != nil {
-		return err
-	}
 
 	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
 	defer cancel()
 
-	err = r.db.QueryRowContext(ctx, query, jwtToken, loginRequestData.UserAgent, loginRequestData.IPAddress, loginRequestData.ISP, loginRequestData.State, loginRequestData.City, loginRequestData.Country, loginRequestData.DeviceType, userData.ID).Scan(&loginRequestData.ID)
+	err := r.db.QueryRowContext(ctx, query, newTask.TaskType, newTask.UserID).Scan(&newTask.ID, &newTask.Status)
 
 	if err != nil {
 		return err
 	}
-	userData.Token = text.TrimmedString(jwtToken)
 	return nil
 }

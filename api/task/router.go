@@ -4,7 +4,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func AuthRouter() *chi.Mux {
+func Router() *chi.Mux {
 
 	r := chi.NewRouter()
 
@@ -13,9 +13,7 @@ func AuthRouter() *chi.Mux {
 	handler := NewHandler(service)
 
 	r.Route("/v1", func(r chi.Router) {
-		r.Post("/login", handler.LoginUser)
-		r.Post("/signup", handler.CreateUser)
-		r.Post("/profile", handler.FetchUser)
+		r.Post("/new", handler.CreateTask)
 	})
 
 	return r

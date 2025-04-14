@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+	"github.com/rranand/backdrop/api/task"
 	"github.com/rranand/backdrop/api/user"
 	custommiddleware "github.com/rranand/backdrop/internal/middleware"
 )
@@ -33,7 +34,8 @@ func Router() *chi.Mux {
 	}))
 
 	routes := []Route{
-		{Path: "/auth", Router: user.AuthRouter()},
+		{Path: "/auth", Router: user.Router()},
+		{Path: "/task", Router: task.Router()},
 	}
 
 	for _, route := range routes {

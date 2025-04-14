@@ -34,12 +34,12 @@ CREATE TABLE login_data (
 );
 
 -- CreateTable
+
 CREATE TABLE tasks (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-    "file_name" TEXT NOT NULL,
+    "file_name" TEXT NOT NULL DEFAULT '',
     "status" "TaskStatus" NOT NULL DEFAULT 'PENDING',
-    "upload_url" TEXT NOT NULL UNIQUE,
-    "result_url" TEXT NOT NULL UNIQUE,
+    "result_url" TEXT NOT NULL DEFAULT '',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "task_type" TEXT NOT NULL,
