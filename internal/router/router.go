@@ -4,8 +4,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+	"github.com/rranand/backdrop/api/user"
 	custommiddleware "github.com/rranand/backdrop/internal/middleware"
-	"github.com/rranand/backdrop/user"
 )
 
 type Route struct {

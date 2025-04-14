@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/rranand/backdrop/api/user"
 	"github.com/rranand/backdrop/internal/util"
 	"github.com/rranand/backdrop/pkg/constants"
 	"github.com/rranand/backdrop/pkg/database"
 	"github.com/rranand/backdrop/pkg/validator"
-	"github.com/rranand/backdrop/user"
 )
 
 var (

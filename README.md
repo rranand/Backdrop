@@ -32,15 +32,27 @@
 
 ```
 backdrop/
-├── cmd/            # App entrypoint (main.go)
-├── internal/       # Core application logic
-│   ├── auth/
-│   ├── db/
-│   ├── task/
-│   └── user/
-├── pkg/            # Worker pool, helpers
-├── TODO.md         # Checklist / roadmap
-└── README.md
+├── api
+│   └── user
+│   └── task
+├── cmd
+│   └── server
+├── go.mod
+├── go.sum
+├── internal
+│   ├── middleware
+│   ├── router
+│   └── util
+├── migration.sql
+├── pkg
+│   ├── constants
+│   ├── crypto
+│   ├── database
+│   ├── formatter
+│   ├── text
+│   └── validator
+├── README.md
+└── TODO.md
 ```
 
 ---
