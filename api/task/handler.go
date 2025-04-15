@@ -1,8 +1,11 @@
 package task
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/rranand/backdrop/api/user"
@@ -77,4 +80,60 @@ func (h *Handler) FetchTask(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(taskData)
+}
+
+func (h *Handler) UploadFile(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	for i := 0; i < 10; i++ {
+		// Check if the request is cancelled
+		select {
+		case <-ctx.Done():
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Request cancelled by user"))
+			return
+		default:
+			fmt.Printf("Running task... Step %d\n", i+1)
+			time.Sleep(1 * time.Second)
+
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("File uploaded successfully"))
+	// res := util.JSONResponseWriter{ResponseWriter: w}
+
+	// r.ParseMultipartForm(20 << 30) // 10MB
+
+	// _, ok := r.Context().Value(constants.AuthDataKey).(user.AuthModel)
+	// if !ok {
+	// 	res.SendJSONError("Internal Server Error", http.StatusBadRequest)
+	// 	return
+	// }
+
+	// file, handler, err := r.FormFile("file")
+	// if err != nil {
+	// 	http.Error(w, "Error retrieving the file", http.StatusBadRequest)
+	// 	return
+	// }
+	// defer file.Close()
+
+	// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	// fmt.Printf("File Size: %+v\n", handler.Size)
+	// fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	// // Create destination file
+	// dst, err := os.Create("/Users/rohitanand/Projects/Backdrop/media/" + handler.Filename)
+	// if err != nil {
+	// 	http.Error(w, "Unable to create the file", http.StatusInternalServerError)
+	// 	return
+	// }
+	// defer dst.Close()
+
+	// // Copy the uploaded file to destination
+	// _, err = io.Copy(dst, file)
+	// if err != nil {
+	// 	http.Error(w, "Error while saving file", http.StatusInternalServerError)
+	// 	return
+	// }
+
 }

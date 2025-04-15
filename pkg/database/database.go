@@ -7,6 +7,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"github.com/rranand/backdrop/pkg/constants"
 )
 
 var DB *sql.DB
@@ -30,7 +31,7 @@ func New(addr string) error {
 	}
 	DB.SetConnMaxIdleTime(duration)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DatabaseConnectionTimeoutDuration)
 	defer cancel()
 
 	if err = DB.PingContext(ctx); err != nil {

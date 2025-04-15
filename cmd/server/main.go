@@ -12,6 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/rranand/backdrop/internal/router"
+	"github.com/rranand/backdrop/pkg/constants"
 	"github.com/rranand/backdrop/pkg/database"
 )
 
@@ -29,7 +30,7 @@ func main() {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DatabaseConnectionTimeoutDuration*time.Second)
 	defer cancel()
 	defer database.Disconnect(ctx)
 
@@ -50,7 +51,7 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGTSTP, syscall.SIGSEGV)
 	<-stop
 
-	ctx_force_exit, cancel_force_exit := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx_force_exit, cancel_force_exit := context.WithTimeout(context.Background(), constants.ServerStopForcefulTimeoutDuration)
 	defer cancel_force_exit()
 
 	if err := srv.Shutdown(ctx_force_exit); err != nil {
