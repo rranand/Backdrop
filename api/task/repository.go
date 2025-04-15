@@ -11,6 +11,7 @@ import (
 
 type Repository interface {
 	CreateTask(ctx context.Context, newTask *NewTaskModel) error
+	FetchTask(ctx context.Context, taskData *TaskResponseModel, uid string) error
 }
 
 type repo struct {
@@ -47,4 +48,46 @@ func (r *repo) CreateTask(ctx context.Context, newTask *NewTaskModel) error {
 		return err
 	}
 	return nil
+}
+
+func (r *repo) FetchTask(ctx context.Context, taskData *TaskResponseModel, uid string) error {
+	query := `
+		SELECT
+		t.download_url, t.status
+		FROM tasks as t
+		JOIN users ON 
+		t.user_id = users.id
+		WHERE
+		t.id = $1 AND 
+		users.id = $2
+	`
+	ctx, cancel := context.WithTimeout(ctx, constants.QueryTimeoutDuration)
+	defer cancel()
+
+	rows, err := r.db.QueryContext(ctx, query, taskData.UploadURL, uid)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	cnt := 0
+
+	for rows.Next() {
+		cnt++
+		err := rows.Scan(&taskData.DownloadURL, &taskData.Status)
+		if err != nil {
+			return err
+		}
+	}
+
+	if cnt > 1 {
+		taskData.DownloadURL = ""
+		taskData.Status = ""
+		return ErrConflict
+	} else if cnt == 0 {
+		return ErrNoRecordFound
+	} else {
+		return nil
+	}
 }

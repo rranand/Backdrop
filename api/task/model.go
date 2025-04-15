@@ -16,3 +16,10 @@ type NewTaskResponseModel struct {
 	TaskType  string `json:"task_type"`
 	Status    string `json:"status,omitempty"`
 }
+
+type TaskResponseModel struct {
+	UploadURL   string `json:"upload_url"`
+	DownloadURL string `json:"download_url"`
+	Status      string `json:"status"`
+	Message     string `json:"message"`
+}

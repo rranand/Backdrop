@@ -1,7 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- CreateEnum
-CREATE TYPE "TaskStatus" AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED');
+CREATE TYPE "TaskStatus" AS ENUM ('NOT_UPLOADED', 'UPLOADING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED');
 -- CreateTable
 CREATE TABLE users (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
@@ -38,8 +38,8 @@ CREATE TABLE login_data (
 CREATE TABLE tasks (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "file_name" TEXT NOT NULL DEFAULT '',
-    "status" "TaskStatus" NOT NULL DEFAULT 'PENDING',
-    "result_url" TEXT NOT NULL DEFAULT '',
+    "status" "TaskStatus" NOT NULL DEFAULT 'NOT_UPLOADED',
+    "download_url" TEXT NOT NULL DEFAULT '',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "task_type" TEXT NOT NULL,

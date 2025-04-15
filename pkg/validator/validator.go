@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/rranand/backdrop/internal/util"
 )
 
@@ -39,4 +40,9 @@ func IsJWTValid(tokenStr string) bool {
 	default:
 		return false
 	}
+}
+
+func IsTaskIDValid(id string) bool {
+	_, err := uuid.Parse(id)
+	return err == nil
 }

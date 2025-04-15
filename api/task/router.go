@@ -14,6 +14,7 @@ func Router() *chi.Mux {
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Post("/new", handler.CreateTask)
+		r.Get("/{taskID}", handler.FetchTask)
 	})
 
 	return r
