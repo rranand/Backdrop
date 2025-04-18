@@ -32,7 +32,7 @@ func ValidateAuthToken(next http.Handler) http.Handler {
 			res := util.JSONResponseWriter{ResponseWriter: w}
 			authHeader := r.Header.Get("Authorization")
 
-			if !validator.IsJWTValid(authHeader) {
+			if !validator.IsJWTValid(&authHeader) {
 				res.SendJSONError("unauthorized access", http.StatusUnauthorized)
 				return
 			}

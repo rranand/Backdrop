@@ -23,14 +23,18 @@ func IsTextEmpty(txt string) bool {
 	return len(TrimString(txt)) == 0
 }
 
-func IsJWTValid(tokenStr string) bool {
+func IsJWTValid(tokenStr *string) bool {
+	if tokenStr == nil || *tokenStr == "" {
+		return false
+	}
+
 	key, err := util.GetJWTSecret()
 
 	if err != nil {
 		return false
 	}
 
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(*tokenStr, func(token *jwt.Token) (interface{}, error) {
 		return key, nil
 	})
 

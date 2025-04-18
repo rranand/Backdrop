@@ -1,7 +1,6 @@
 package task
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -83,19 +82,24 @@ func (h *Handler) FetchTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UploadFile(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	for i := 0; i < 10; i++ {
-		// Check if the request is cancelled
+	res := util.JSONResponseWriter{ResponseWriter: w}
+	ctx := r.Context()
+
+	w.Header().Set("Connection", "close")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+
+	for i := range 10 {
+		if err := ctx.Err(); err != nil {
+			fmt.Printf("Context error at step %d: %v\n", i+1, err)
+			res.SendJSONError("Request cancelled by user", http.StatusBadRequest)
+			return
+		}
 		select {
 		case <-ctx.Done():
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Request cancelled by user"))
+			res.SendJSONError("Request cancelled by user", http.StatusBadRequest)
 			return
-		default:
+		case <-time.After(1 * time.Second):
 			fmt.Printf("Running task... Step %d\n", i+1)
-			time.Sleep(1 * time.Second)
-
 		}
 	}
 	w.WriteHeader(http.StatusOK)
